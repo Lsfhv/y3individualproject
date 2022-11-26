@@ -42,15 +42,18 @@ val dfa = new DFA(states, Q0, transition, finalStates)
 
 // minimize the DFA
 
-implicit class Crossable[X](xs: List[X]) {
-    def cross[Y](ys: List[Y]) = 
-        (for (i <- 0 until xs.size) yield 
-            for (s <- (for (j <- i+1 until ys.size) yield ys(j)).toList) yield (xs(i), s)).toList
-}
+// implicit class Crossable[X](xs: List[X]) {
+//     def cross[Y](ys: List[Y]) = 
+//         (for (i <- 0 until xs.size) yield 
+//             for (s <- (for (j <- i+1 until ys.size) yield ys(j)).toList) yield (xs(i), s)).toList
+// }
 
-// initaliit ymark the states
+// def test(p: State, q: State): Boolean = 
+//     if (finalStates.contains(p) && !finalStates.contains(q) ||
+//         finalStates.contains(q) && !finalStates.contains(p)) true else false
 
-(states cross states).filter()
+
+// (states cross states).filter(x => test(x._1, x._2))
 
 
 // check if its aperiodic
