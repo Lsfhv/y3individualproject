@@ -40,20 +40,33 @@ val transition : (State, Char) => State = {
 
 val dfa = new DFA(states, Q0, transition, finalStates)
 
-// minimize the DFA
+// First phase 
+// DFA minimization by brzozwski
 
-// implicit class Crossable[X](xs: List[X]) {
-//     def cross[Y](ys: List[Y]) = 
-//         (for (i <- 0 until xs.size) yield 
-//             for (s <- (for (j <- i+1 until ys.size) yield ys(j)).toList) yield (xs(i), s)).toList
-// }
+implicit class Crossable[X](xs: List[X]) {
+    def cross[Y](ys: List[Y]) = 
+        (for (i <- 0 until xs.size) yield 
+            for (s <- (for (j <- i+1 until ys.size) yield ys(j)).toList) yield (xs(i), s)).toList.flatten.toSet
+}
 
-// def test(p: State, q: State): Boolean = 
-//     if (finalStates.contains(p) && !finalStates.contains(q) ||
-//         finalStates.contains(q) && !finalStates.contains(p)) true else false
+def initialMarked(q: State, p: State, marked: Set[(State, State)]) = {
+    if ((finalStates.contains(q) && !finalStates.contains(p)) || 
+        (!finalStates.contains(q)) && finalStates.contains(p) || 
+        marked.contains((q,p)) || marked.contains((p,q))
+        ) true else false
+}
 
+def recurse(marked: Set[(State, State)], unmarked: Set[(State, State)]): (Set[(State, State)], Set[(State, State)]) = {
+    val x = unmarked.partition(x=>initialMarked(x._1, x._2, marked))
+    println(x)
+    if (x == (marked, unmarked)) (marked, unmarked)
+    else recurse(marked ++ x._1, x._2)
+}
 
-// (states cross states).filter(x => test(x._1, x._2))
+// keep recursing until no more new states are marked. 
 
+recurse(states cross states, Nil.toSet)
+
+// generate transition monoid
 
 // check if its aperiodic
