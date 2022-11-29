@@ -34,7 +34,7 @@ val transition : (State, Char) => State = {
     case (Q2, '0') => Q3
     case (Q2, '1') => Q2
     case (Q3, '0') => Q4
-    case (Q3, '1') => Q1
+    case (Q3, '1') => Q0
     case (Q4, _) => Q4
 }
 
@@ -54,19 +54,29 @@ def initialMarked(q: State, p: State, marked: Set[(State, State)]) = {
         (!finalStates.contains(q)) && finalStates.contains(p) || 
         marked.contains((q,p)) || marked.contains((p,q))
         ) true else false
+} // check if recheable by transition to a marked state now.
+
+def reachable(q: State, p: State, marked: Set[(State, State)]) = {
+    var flag = false
+    for (x <- alphabet) yield{
+        if (marked.contains(transition(q, x), transition(p, x)) || marked.contains(transition(p, x), transition(q, x))) {
+            flag = true
+        } 
+    }
+    flag
 }
 
 def recurse(marked: Set[(State, State)], unmarked: Set[(State, State)]): (Set[(State, State)], Set[(State, State)]) = {
     val x = unmarked.partition(x=>initialMarked(x._1, x._2, marked))
-    println(x)
-    if (x == (marked, unmarked)) (marked, unmarked)
-    else recurse(marked ++ x._1, x._2)
+    if (x._1.size == 0) (marked, unmarked) else recurse(marked ++ x._1, x._2)
 }
 
-// keep recursing until no more new states are marked. 
+def main(marked: Set[(State, State)], unmarked: Set[(State, State)]): (Set[(State, State)], Set[(State, State)]) = {
+    val x = unmarked.partition(x=>reachable(x._1, x._2, marked))
+    if (x._1.size == 0) (marked, unmarked) else main(marked ++ x._1, x._2)
+}
 
-recurse(states cross states, Nil.toSet)
+val x = recurse(Nil.toSet, states cross states)
+main(x._1, x._2)
 
-// generate transition monoid
-
-// check if its aperiodic
+// now minimize
