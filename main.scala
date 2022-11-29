@@ -1,5 +1,3 @@
-
-
 val states: List[String] = "Q0"::"Q1"::"Q2"::"Q3"::"Q4"::Nil
 val finalStates: List[String] = "Q4"::Nil
 val alphabet: List[Char] = '0'::'1'::Nil
@@ -16,15 +14,29 @@ val transition : (String, Char) => String = {
     case ("Q3", '1') => "Q0"
     case ("Q4", _) => "Q4"
 }
+import scala.collection.mutable.HashMap
+
+var transitionMap: HashMap[(String, Char), String]  = HashMap(
+    ("Q0", '1') -> "Q2",
+    ("Q0", '0') -> "Q1", 
+    ("Q1", '0') -> "Q4", 
+    ("Q1", '1') -> "Q2",
+    ("Q2", '0') -> "Q3",
+    ("Q2", '1') -> "Q2",
+    ("Q3", '0') -> "Q4",
+    ("Q3", '1') -> "Q0",
+    ("Q4", '1') -> "Q4", 
+    ("Q4", '0') -> "Q4"
+) 
 
 case class DFA(states: List[String],
     start: String, 
-    transition: (String, Char) => String, 
+    transition: HashMap[(String, Char), String], 
     finalStates: List[String]) {
 
         def compute(q: String, input: List[Char]): String = input match {
             case Nil => q
-            case x::xs => compute(transition(q,x),xs)
+            case x::xs => compute(transition((q,x)),xs)
         }
 
         def accepts(s: String) : Boolean = {
@@ -53,7 +65,7 @@ def recurse(marked: Set[(String, String)], unmarked: Set[(String, String)]): (Se
 def reachable(q: String, p: String, marked: Set[(String, String)]) = {
     var flag = false
     for (x <- alphabet) yield{
-        if (marked.contains(transition(q, x), transition(p, x)) || marked.contains(transition(p, x), transition(q, x))) {
+        if (marked.contains(transitionMap((q, x)), transitionMap((p, x))) || marked.contains(transitionMap((p, x)), transitionMap((q, x)))) {
             flag = true
         } 
     }
@@ -64,3 +76,45 @@ def main(marked: Set[(String, String)], unmarked: Set[(String, String)]): (Set[(
     val x = unmarked.partition(x=>reachable(x._1, x._2, marked))
     if (x._1.size == 0) (marked, unmarked) else main(marked ++ x._1, x._2)
 }
+
+val x = recurse(Nil.toSet, states cross states)
+val f = main(x._1, x._2)
+
+def generateStates(states: List[String], unmarked: Set[(String, String)]): List[String] = {
+    val x = for (x <- unmarked.toList) yield{
+        s"${x._1},${x._2.substring(1)}"
+    }
+    states ++ x
+}
+
+// f._2 are the states that need to get merged
+val newStates = generateStates(states, f._2)
+
+// generate new transitions via hashmap
+def generateTransitions(tuple: (String, String)) = {
+    val first = tuple._1
+    val second = tuple._2
+
+    val combined = s"${first},${second.substring(1)}"
+
+    for (x <- alphabet) {
+        val one = transitionMap((first, x))
+        val two = transitionMap((second, x))
+
+        if (two == first || two == one) {
+            println("hello")
+        } else if (one != two) {
+            val n = s"${one},${two.substring(1)}"
+            transitionMap += ((combined, x) -> n)
+        } else {
+            transitionMap += ((combined, x) -> transitionMap((first, x)))
+        }
+
+        transitionMap -= ((first, x))
+        transitionMap -= ((second, x))
+    }
+
+    // remove transitoins for first and second as they 
+    // do not exist anymore
+}
+// (String, char) into a string
