@@ -1,4 +1,4 @@
-val states: List[String] = "Q0"::"Q1"::"Q2"::"Q3"::"Q4"::Nil
+var states: List[String] = "Q0"::"Q1"::"Q2"::"Q3"::"Q4"::Nil
 val finalStates: List[String] = "Q4"::Nil
 val alphabet: List[Char] = '0'::'1'::Nil
 
@@ -84,37 +84,58 @@ def generateStates(states: List[String], unmarked: Set[(String, String)]): List[
     val x = for (x <- unmarked.toList) yield{
         s"${x._1},${x._2.substring(1)}"
     }
-    states ++ x
+    states ++ x 
+}
+
+def deleteUnmarked(states: List[String], unmarked: List[(String, String)]): List[String] = unmarked match{
+    case Nil => states
+    case x::xs => deleteUnmarked(states diff x._1::x._2::Nil, xs)
 }
 
 // f._2 are the states that need to get merged
-val newStates = generateStates(states, f._2)
+val nwStates = generateStates(states, f._2)
 
-// generate new transitions via hashmap
-def generateTransitions(tuple: (String, String)) = {
-    val first = tuple._1
-    val second = tuple._2
+var newStates = deleteUnmarked(nwStates, f._2.toList)
+var unmarked = f._2.toList
 
-    val combined = s"${first},${second.substring(1)}"
-
-    for (x <- alphabet) {
-        val one = transitionMap((first, x))
-        val two = transitionMap((second, x))
-
-        if (two == first || two == one) {
-            println("hello")
-        } else if (one != two) {
-            val n = s"${one},${two.substring(1)}"
-            transitionMap += ((combined, x) -> n)
-        } else {
-            transitionMap += ((combined, x) -> transitionMap((first, x)))
-        }
-
-        transitionMap -= ((first, x))
-        transitionMap -= ((second, x))
+def generateNewTransition(unmarked: List[(String, String)]): Unit = unmarked match{
+    case Nil => {
+        return
     }
+    case x::xs => {
+        // remove the old transition
+        val x1 = x._1
+        val x2 = x._2
 
-    // remove transitoins for first and second as they 
-    // do not exist anymore
+        val combined = s"${x1},${x2.substring(1)}"
+        for (x <- alphabet) {
+           
+            val new1 = transitionMap((x1, x))
+            val new2 = transitionMap((x2, x))
+            val combined1 = s"${new1},${new2.substring(1)}"
+            val combined2 = s"${new2},${new1.substring(1)}"
+
+            if (new1 == new2) {
+                if (!newStates.contains(new1)) {
+                    transitionMap += ((combined, x) -> combined)
+                } else {
+                    transitionMap += ((combined, x) -> new1)
+                }
+            } else {
+                if (newStates.contains(combined1)) {
+                    transitionMap += ((combined, x) -> combined1)
+                } else {
+                    transitionMap += ((combined, x) -> combined2)
+                }
+            }
+
+            transitionMap -= ((x1, x))
+            transitionMap -=( (x2, x))
+
+            println(new1, new2)
+
+        }
+        generateNewTransition(xs)
+    }
 }
 // (String, char) into a string
