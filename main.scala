@@ -2,18 +2,6 @@ var states: List[String] = "Q0"::"Q1"::"Q2"::"Q3"::"Q4"::Nil
 val finalStates: List[String] = "Q4"::Nil
 val alphabet: List[Char] = '0'::'1'::Nil
 
-
-val transition : (String, Char) => String = {
-    case ("Q0", '1') => "Q2"
-    case ("Q0", '0') => "Q1"
-    case ("Q1", '0') => "Q4"
-    case ("Q1", '1') => "Q2"
-    case ("Q2", '0') => "Q3"
-    case ("Q2", '1') => "Q2"
-    case ("Q3", '0') => "Q4"
-    case ("Q3", '1') => "Q0"
-    case ("Q4", _) => "Q4"
-}
 import scala.collection.mutable.HashMap
 
 var transitionMap: HashMap[(String, Char), String]  = HashMap(
