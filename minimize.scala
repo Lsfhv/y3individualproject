@@ -78,10 +78,3 @@ def main(marked: Set[(State, State)], unmarked: Set[(State, State)]): (Set[(Stat
 
 val x = recurse(Nil.toSet, states cross states)
 main(x._1, x._2)
-// merge the states in x._2
-// now merge the unmarked states.
-
-def generateStates(states: List[String], unmarked: Set[(String, String)]): List[String] = {
-
-}
-

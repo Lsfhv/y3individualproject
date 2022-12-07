@@ -4,7 +4,7 @@ val alphabet: List[Char] = '0'::'1'::Nil
 
 import scala.collection.mutable.HashMap
 
-var transitionMap: HashMap[(String, Char), String]  = HashMap(
+var transitionMap: HashMap[(String, Char), String]  = HashMap (
     ("Q0", '1') -> "Q2",
     ("Q0", '0') -> "Q1", 
     ("Q1", '0') -> "Q4", 
@@ -15,7 +15,7 @@ var transitionMap: HashMap[(String, Char), String]  = HashMap(
     ("Q3", '1') -> "Q0",
     ("Q4", '1') -> "Q4", 
     ("Q4", '0') -> "Q4"
-) 
+    ) 
 
 case class DFA(states: List[String],
     start: String, 
